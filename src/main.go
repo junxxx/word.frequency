@@ -1,21 +1,30 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"io"
+	"os"
 
-	v1 "github.com/junxxx/word.frequency/v1"
+	v2 "github.com/junxxx/word.frequency/v2"
 )
 
-var trimCharacter = []string{"\"", ".", ",", "“"}
+var f string
+
+func init() {
+	flag.StringVar(&f, "f", "", "cal the world of the file")
+}
 
 func main() {
-	text := `Three, "European prime ministers visited Kyiv on Tuesday. The prime ministers of neighboring Poland, Czechia and Slovenia came to Ukraine by train for the first such visit by foreign leaders since the Russian invasion.
-
-	"It is our duty to be where history is forged. Because it's not about us, but about the future of our children who deserve to live in a world free from tyranny," said Polish Prime Minister Mateusz Morawiecki. Czech Prime Minister Petr Fiala and Janez Jansa of Slovenia joined him on the trip.
-	
-	Fiala said the visit was to show complete “support of the entire European Union for the sovereignty and independence of Ukraine."
-	`
-	for word, cnt := range v1.Counter(text, trimCharacter) {
-		fmt.Println(word, cnt)
+	flag.Parse()
+	r, err := os.Open(f)
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
+	text, err := io.ReadAll(r)
+	var wordCounter v2.WordCounter
+	wordCounter.Read([]byte(text))
+	wordCounter.Calculate()
+	fmt.Println(wordCounter)
 }
