@@ -3,13 +3,13 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io"
 	"os"
 
-	v2 "github.com/junxxx/word.frequency/v2"
+	v3 "github.com/junxxx/word.frequency/v3"
 )
 
 var f string
+var trimCharacter = []string{"\"", ".", ",", "“"}
 
 func init() {
 	flag.StringVar(&f, "f", "", "cal the world of the file")
@@ -22,9 +22,11 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	text, err := io.ReadAll(r)
-	var wordCounter v2.WordCounter
-	wordCounter.Read([]byte(text))
-	wordCounter.Calculate()
-	fmt.Println(wordCounter)
+	defer r.Close()
+	wordCount, err := v3.NewCounter(r).Trim(trimCharacter).Count()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(wordCount)
 }

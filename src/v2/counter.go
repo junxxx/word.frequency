@@ -20,6 +20,7 @@ type Word struct {
 	count int
 }
 
+// counter do count the word, other thing should do by caller
 type sortedWord []Word
 
 func (sw sortedWord) Len() int           { return len(sw) }
