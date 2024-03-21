@@ -23,10 +23,11 @@ func main() {
 		return
 	}
 	defer r.Close()
-	wordCount, err := v3.NewCounter(r).Trim(trimCharacter).Count()
+	counter := v3.NewCounter(r)
+	err = counter.Count()
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(wordCount)
+	fmt.Println(counter)
 }

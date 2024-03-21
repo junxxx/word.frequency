@@ -2,53 +2,45 @@ package v3
 
 import (
 	"io"
-	"strings"
+	"strconv"
 )
 
 type Counter struct {
-	r        io.Reader
-	trimChar []string
+	r     io.Reader
+	count map[string]int
 }
 
 func NewCounter(r io.Reader) *Counter {
-	return &Counter{r: r}
+	return &Counter{r: r, count: make(map[string]int)}
 }
 
-func (c *Counter) Trim(char []string) *Counter {
-	c.trimChar = char
-	return c
+func isCharacter(c byte) bool {
+	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
 }
 
-func (c *Counter) Count() (count map[string]int, err error) {
-	count = make(map[string]int)
+func (c *Counter) Count() error {
 	buf, err := io.ReadAll(c.r)
 	if err != nil {
-		return
+		return err
 	}
-	for _, word := range strings.Fields(string(buf)) {
-		trim(&word, c.trimChar)
-		if isWord(word) {
-			count[word]++
-		}
-	}
-	return
-}
-
-// could optimization
-func isWord(s string) bool {
-	for _, c := range s {
-		if (c >= 'A' && c <= 'Z') ||
-			(c >= 'a' && c <= 'z') || c == '\'' {
-
+	word := make([]byte, 1)
+	for _, char := range buf {
+		if isCharacter(char) {
+			word = append(word, char)
 		} else {
-			return false
+			if len(word) > 0 {
+				c.count[string(word)]++
+				word = nil
+			}
 		}
 	}
-	return true
+	return nil
 }
 
-func trim(s *string, c []string) {
-	for _, i := range c {
-		*s = strings.Trim(*s, i)
+func (c Counter) String() string {
+	var out string
+	for word, num := range c.count {
+		out += word + "    " + strconv.Itoa(num) + "\n"
 	}
+	return out
 }
